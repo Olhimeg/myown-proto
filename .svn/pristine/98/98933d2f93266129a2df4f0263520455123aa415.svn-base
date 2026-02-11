@@ -1,0 +1,106 @@
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent} from "@/components/ui/tooltip"
+import { AppSidebar } from "@/components/AppSidebar";
+import Dashboard from '@/pages/Dashboard';
+import Debug from '@/pages/Debug';
+import { Sun, Moon, Palette } from 'lucide-react';
+
+type Theme = 'light' | 'dark' | 'gray';
+
+function App() {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem('theme') as Theme;
+    if (saved && ['light', 'dark', 'gray'].includes(saved)) return saved;
+    return 'light'; // по умолчанию белая
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark', 'gray');
+    document.documentElement.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const cycleTheme = () => {
+    setTheme(prev => {
+      if (prev === 'light') return 'dark';
+      if (prev === 'dark') return 'gray';
+      return 'light';
+    });
+  };
+
+  const getThemeIcon = () => {
+    if (theme === 'light') return <Sun className="h-5 w-5 text-yellow-500" />;
+    if (theme === 'dark') return <Moon className="h-5 w-5 text-slate-300" />;
+    return <Palette className="h-5 w-5 text-gray-400" />;
+  };
+
+  const getThemeLabel = () => {
+    if (theme === 'light') return 'Перейти на тёмную тему';
+    if (theme === 'dark') return 'Перейти на тёмно-серую тему';
+    return 'Перейти на светлую тему';
+  };
+
+  return (
+    <BrowserRouter>
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full overflow-hidden">
+          <div className="flex-shrink-0">
+            <AppSidebar />
+          </div>
+
+          <SidebarInset className="flex flex-col flex-1 min-w-0">
+            <header className="h-20 border-b bg-gradient-to-r from-background to-muted/20 px-8 flex items-center shadow-sm flex-shrink-0">
+              <SidebarTrigger className="mr-6 hover:bg-muted/50 rounded-md p-2 lg:hidden" />
+
+              <h2 className="text-2xl font-semibold tracking-tight flex-1">
+                Multitool Dashboard
+              </h2>
+
+              <div className="flex items-center gap-6">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={cycleTheme}
+                        className="p-3 rounded-full hover:bg-muted/80 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        aria-label={getThemeLabel()}
+                      >
+                        {getThemeIcon()}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {getThemeLabel()}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                {/* Профиль */}
+                <div className="flex items-center gap-4 bg-muted/40 px-5 py-2.5 rounded-xl">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white text-lg font-bold">
+                    DU
+                  </div>
+                  <span className="font-medium text-base">Demo User</span>
+                </div>
+              </div>
+            </header>
+
+            <main className="flex-1 overflow-auto p-8 lg:p-10 bg-background">
+              <div className="mx-auto max-w-7xl w-full">
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/debug" element={<Debug />} />
+                  <Route path="*" element={<div className="text-center py-32 text-3xl text-muted-foreground">Страница не найдена</div>} />
+                </Routes>
+              </div>
+            </main>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;

@@ -1,0 +1,43 @@
+export default function Dashboard() {
+  const stands = [
+    { id: 1, name: "L111", type: "Windows 7", status: "online", load: 42, color: "bg-emerald-500" },
+    { id: 2, name: "PC602", type: "Windows 11",   status: "offline", load: 0, color: "bg-rose-500" },
+    { id: 3, name: "wotqa13", type: "Standalone server", status: "online", load: 78, color: "bg-emerald-500" },
+    { id: 4, name: "Parser", type: "by1-pnc-03",         status: "warning", load: 92, color: "bg-amber-500" },
+  ];
+
+  return (
+    <div className="space-y-10">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight">Dashboard</h1>
+          <p className="mt-2 text-xl text-muted-foreground">
+            Обзор стендов • {new Date().toLocaleDateString('ru-RU')}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        {stands.map(stand => (
+          <div
+            key={stand.id}
+            className="rounded-2xl border bg-card shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+          >
+            <div className="p-8">
+              <div className="flex items-start justify-between mb-6">
+                <h3 className="text-2xl font-semibold">{stand.name}</h3>
+                <div className={`h-5 w-5 rounded-full ${stand.color} ring-4 ring-offset-4 ring-offset-background`} />
+              </div>
+              <p className="text-lg text-muted-foreground mb-6">{stand.type}</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-5xl font-extrabold">{stand.load}</span>
+                <span className="text-3xl font-bold text-muted-foreground">%</span>
+              </div>
+              <p className="mt-2 text-lg text-muted-foreground">текущая нагрузка</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

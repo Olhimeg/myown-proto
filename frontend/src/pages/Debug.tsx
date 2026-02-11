@@ -1,0 +1,141 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Send, Terminal, AlertCircle } from 'lucide-react';
+
+export default function Debug() {
+  const [standName, setStandName] = useState('');
+  const [command, setCommand] = useState('');
+  const [logs, setLogs] = useState<string[]>([
+    '[14:35:22] Система готова к работе',
+    '[14:35:45] Ожидание ввода стенда и команды...',
+  ]);
+
+  const handleSend = () => {
+    if (!standName.trim() || !command.trim()) {
+      setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] Ошибка: укажите стенд и команду`]);
+      return;
+    }
+
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = `[${timestamp}] Отправлена команда на "${standName.trim()}": ${command.trim()}`;
+
+    setLogs(prev => [...prev, logEntry, `[${timestamp}] Выполнение...`]);
+
+    // Имитация ответа от стенда (можно потом заменить реальным запросом)
+    setTimeout(() => {
+      const success = Math.random() > 0.2;
+      const result = success
+        ? 'Успех: команда выполнена'
+        : 'Ошибка: команда не удалась (таймаут / недоступен стенд)';
+      setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${result}`]);
+    }, 1500);
+
+    setCommand(''); // очищаем поле команды после отправки
+  };
+
+  return (
+    <div className="h-full flex flex-col space-y-6">
+      {/* Заголовок */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Debug Console</h1>
+        <p className="text-muted-foreground mt-1">
+          Ручное выполнение команд на стендах и серверах
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+        {/* Левая колонка — ввод данных */}
+        <Card className="lg:col-span-1 border-border bg-card/80 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2">
+              <Terminal className="h-5 w-5 text-primary" />
+              Управление
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Поле для имени стенда/сервера */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Имя стенда / сервера</label>
+              <Input
+                value={standName}
+                onChange={e => setStandName(e.target.value)}
+                placeholder="stand-01, server-perf-02, lab-pc-05..."
+                className="bg-muted/50 border-input font-mono"
+              />
+            </div>
+
+            {/* Большое поле для команды */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Команда</label>
+              <Textarea
+                value={command}
+                onChange={e => setCommand(e.target.value)}
+                placeholder="git pull origin main&#10;ipconfig /flushdns&#10;shutdown /r /t 0"
+                className="min-h-[180px] resize-y bg-muted/50 border-input font-mono text-base leading-relaxed"
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Shift + Enter — новая строка • Enter — отправить
+              </p>
+            </div>
+
+            {/* Кнопка отправки */}
+            <Button
+              onClick={handleSend}
+              disabled={!standName.trim() || !command.trim()}
+              className="w-full py-6 text-lg"
+            >
+              <Send className="h-5 w-5 mr-3" />
+              Отправить команду
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Правая колонка — логи */}
+        <Card className="lg:col-span-2 border-border bg-card/80 backdrop-blur-sm flex flex-col">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-primary" />
+              Логи
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 p-0">
+            <ScrollArea className="h-full px-6 pb-6">
+              <div className="space-y-3 font-mono text-sm">
+                {logs.map((log, index) => (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border border-border/30 ${
+                      log.includes('Ошибка')
+                        ? 'bg-destructive/10 text-destructive border-destructive/30'
+                        : log.includes('Успех')
+                        ? 'bg-emerald-950/20 text-emerald-400 border-emerald-900/30'
+                        : 'bg-muted/30 text-muted-foreground border-muted'
+                    }`}
+                  >
+                    {log}
+                  </div>
+                ))}
+
+                {logs.length === 0 && (
+                  <div className="text-center py-20 text-muted-foreground text-lg">
+                    Команды ещё не отправлялись
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

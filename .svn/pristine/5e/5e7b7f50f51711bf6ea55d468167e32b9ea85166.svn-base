@@ -1,0 +1,60 @@
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import {
+  Activity, Gauge, HardDrive, LayoutDashboard, Settings, Terminal, Zap
+} from "lucide-react";
+import { Link, useLocation } from 'react-router-dom';
+
+const menuItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Debug Console", url: "/debug", icon: Terminal },
+  { title: "Statistics", url: "/monitoring", icon: Activity },
+  { title: "Tests: Performance", url: "/perf", icon: Gauge },
+  { title: "Tests: Stability", url: "/stands", icon: Zap },
+  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Workers", url: "/page7", icon: HardDrive },
+];
+
+export function AppSidebar() {
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  return (
+    <Sidebar collapsible="none" className="border-r w-72 flex-shrink-0">
+      <SidebarContent>
+        <div className="p-6 border-b">
+          <h1 className="text-2xl font-bold tracking-tight">Multitool</h1>
+          <p className="text-sm text-muted-foreground mt-1">Сюда шлёпнем картинку</p>
+        </div>
+
+        <SidebarGroup className="px-3 mt-4">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.url}
+                    className="py-3 text-base justify-start"
+                  >
+                    <Link to={item.url} className="flex items-center gap-4">
+                      <item.icon className="h-6 w-6" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
+}
