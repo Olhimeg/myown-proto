@@ -1,16 +1,28 @@
-# This is a sample Python script.
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from app.database import init_db, close_db
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("STARTUP: начинаем подключение к MongoDB...")
+    await init_db()
+    print("STARTUP: lifespan завершён успешно")
+    yield
+    await close_db()
+    print("SHUTDOWN: MongoDB закрыта")
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+app = FastAPI(
+    title="Multitool Hub Backend",
+    lifespan=lifespan,  # ← здесь lifespan должен быть указан!
+)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+from app.routers.debug import router as debug_router
+
+app.include_router(debug_router)
